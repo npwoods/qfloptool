@@ -51,6 +51,12 @@ jobs:
         path: deps/install
         key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.build_type }}-${{ hashFiles('.github/workflows/windows_msys2.yml')}}
 
+    # Retrieve MAME
+    - name: Retrieve MAME
+      if: steps.cache-deps.outputs.cache-hit != 'true'
+      run: |
+        git submodule update --init deps/mame
+
     # Build qfloptool
     - name: Build qfloptool
       run: |
