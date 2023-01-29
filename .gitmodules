@@ -1,0 +1,18 @@
+[submodule "deps/mame"]
+	path = deps/mame
+	url = git@github.com:mamedev/mame.git
+	branch = tags/mame0251
+	shallow = true
+	ignore = all
+[submodule "deps/expat"]
+	path = deps/expat
+	url = https://github.com/libexpat/libexpat.git
+	branch = R_2_4_1
+	shallow = true
+	ignore = all
+[submodule "deps/zlib"]
+	path = deps/zlib
+	url = https://github.com/madler/zlib.git
+	branch = v1.2.11
+	shallow = true
+	ignore = all

@@ -1,0 +1,57 @@
+##########################################
+# qfloptool Windows MSYS2 Github Action  #
+##########################################
+
+name: Windows MSYS2
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the master branch
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        build_type: [Debug, Release]
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+
+    # Checks out your repository under $GITHUB_WORKSPACE, so your job can access it
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    # Install MSYS2
+    - name: Install MSYS2
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: MINGW64
+        update: false
+        release: false
+        install: git parallel p7zip mingw-w64-x86_64-toolchain mingw-w64-x86_64-cmake mingw-w64-x86_64-ninja mingw-w64-x86_64-polly mingw-w64-x86_64-mlir mingw-w64-x86_64-clang mingw-w64-x86_64-clang-analyzer mingw-w64-x86_64-clang-tools-extra mingw-w64-x86_64-qt6-static mingw-w64-x86_64-jasper mingw-w64-x86_64-graphite2 patch
+
+    # Cache Dependencies
+    - name: Cache Dependencies
+      id: cache-deps
+      uses: actions/cache@v3
+      env:
+        cache-name: cache-deps
+      with:
+        path: deps/install
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.build_type }}-${{ hashFiles('.github/workflows/windows_msys2.yml')}}
+
+    # Build qfloptool
+    - name: Build qfloptool
+      run: |
+        sh scripts/qfloptool_build_msys2.sh -b ${{ matrix.build_type }}

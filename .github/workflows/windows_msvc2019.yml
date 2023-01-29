@@ -1,0 +1,91 @@
+#############################################
+# qfloptool Windows MSVC2022 Github Action  #
+#############################################
+
+name: Windows MSVC2022
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the master branch
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        config: [Debug, Release]
+        qt: [6.2.1, 6.4.0]
+    runs-on: windows-2022
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+
+    # Checks out your repository under $GITHUB_WORKSPACE, so your job can access it
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    # Install MSYS2
+    - name: Install MSYS2
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: MINGW64
+        update: false
+        release: false
+        install: git parallel mingw-w64-x86_64-cmake
+
+    # Install Qt
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v2
+      with:
+        version: ${{ matrix.qt }}
+        modules: 'qt5compat'
+        dir: C:\
+        arch: win64_msvc2019_64
+
+    # Cache Dependencies
+    - name: Cache Dependencies
+      id: cache-deps
+      uses: actions/cache@v3
+      env:
+        cache-name: cache-deps
+      with:
+        path: deps/install
+        key: ${{ runner.os }}-build-${{ matrix.config }}-${{ env.cache-name }}-${{ hashFiles('.github/workflows/windows_msvc2019.yml', 'scripts/zlib_build_msvc.sh', 'scripts/expat_build_msvc.sh')}}
+
+    # Retrieve Zlib
+    - name: Retrieve Zlib
+      if: steps.cache-deps.outputs.cache-hit != 'true'
+      run: |
+        git submodule update --init deps/zlib
+
+    # Retrieve Expat
+    - name: Retrieve Expat
+      if: steps.cache-deps.outputs.cache-hit != 'true'
+      run: |
+        git submodule update --init deps/expat
+
+    # Build Zlib
+    - name: Build Zlib
+      if: steps.cache-deps.outputs.cache-hit != 'true'
+      run: |
+        sh scripts/zlib_build_msvc.sh -c ${{ matrix.config }}
+
+    # Build Expat
+    - name: Build Expat
+      if: steps.cache-deps.outputs.cache-hit != 'true'
+      run: |
+        sh scripts/expat_build_msvc.sh -c ${{ matrix.config }}
+
+    # Build qfloptool
+    - name: Build qfloptool
+      run: |
+        sh scripts/qfloptool_build_msvc.sh -c ${{ matrix.config }} -q ${{ matrix.qt }}
