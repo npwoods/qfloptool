@@ -1,6 +1,6 @@
 [submodule "deps/mame"]
 	path = deps/mame
-	url = git@github.com:mamedev/mame.git
+	url = https://github.com/mamedev/mame.git
 	branch = tags/mame0251
 	shallow = true
 	ignore = all

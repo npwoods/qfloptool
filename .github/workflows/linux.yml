@@ -49,10 +49,16 @@ jobs:
         sudo apt update
         sudo apt install -y freeglut3-dev libalut-dev libasound2-dev libc6-dev libgl1-mesa-dev libglu1-mesa-dev llvm-11 libxcursor-dev libxi-dev libxinerama-dev libxrandr-dev libxxf86vm-dev mesa-utils pkg-config xorg-dev xvfb
 
+    # Retrieve MAME
+    - name: Retrieve MAME
+      if: steps.cache-deps.outputs.cache-hit != 'true'
+      run: |
+        git submodule update --init deps/mame
+
     # Build qfloptool
     - name: Build qfloptool
       run: |
-        cmake . -DHAS_VERSION_GEN_H=1 -D CMAKE_CXX_COMPILER=${{ matrix.cxx }} -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+        cmake . -D CMAKE_CXX_COMPILER=${{ matrix.cxx }} -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
         make -j 8
         strip ./qfloptool
 
