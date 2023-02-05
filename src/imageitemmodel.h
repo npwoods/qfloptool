@@ -43,6 +43,7 @@ public:
 	void setExpanded(const QModelIndex &index, bool expanded);
 	Floptool::Image::ptr detachImage();
 	QString fileName(const QModelIndex &index) const;
+	std::optional<std::vector<uint8_t>> readFile(const QModelIndex &index) const;
 	void extract(const QModelIndex &index, const QString &path, bool appendImageFileName);
 
 	// virtuals
@@ -80,6 +81,7 @@ private:
 	DirectoryEntry *findDirectoryEntry(const QModelIndex &index);
 	QString convert(std::string_view s) const;
 	QPixmap iconFromDirectoryEntry(const DirectoryEntry &directoryEntry) const;
+	std::vector<std::string> pathFromModelIndex(const QModelIndex &index, int &directoryIndex, int &directoryEntryIndex) const;
 	void internalExtract(std::vector<std::string> &pathOnImage, int directoryIndex, int directoryEntryIndex, const QString &path);
 };
 

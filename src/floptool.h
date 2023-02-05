@@ -109,6 +109,7 @@ public:
 		// methods
 		QString convert(std::string_view s) const;
 		std::optional<QString> volumeName() const;
+		std::optional<std::vector<uint8_t>> readFile(const std::vector<std::string> &path) const;
 
 	private:
 		const FloppyFormat &				m_format;

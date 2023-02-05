@@ -16,3 +16,6 @@
 	branch = v1.2.11
 	shallow = true
 	ignore = all
+[submodule "deps/qhexview"]
+	path = deps/qhexview
+	url = https://github.com/virinext/QHexView.git

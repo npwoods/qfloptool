@@ -12,6 +12,7 @@
 #include "floptool.h"
 #include "imageitemmodel.h"
 #include "dialogs/identify.h"
+#include "dialogs/viewfile.h"
 
 // Qt includes
 #include <QFileDialog>
@@ -207,6 +208,7 @@ bool MainWindow::loadImage(Floptool::Image::ptr &&image, QString &&fileName, QSt
 	// for some reason, the signal needs to be set up here
 	connect(m_ui->mainTree->selectionModel(), &QItemSelectionModel::selectionChanged, this, [this](const QItemSelection &selected, const QItemSelection &deselected)
 	{
+		m_ui->actionView->setEnabled(!selected.indexes().isEmpty());
 		m_ui->actionExtract->setEnabled(!selected.indexes().isEmpty());
 	});
 
@@ -346,32 +348,14 @@ void MainWindow::extractMultiple(ImageItemModel &model, const QModelIndexList &i
 
 
 //-------------------------------------------------
-//  extractSelection
+//  addReplicatedAction
 //-------------------------------------------------
 
-void MainWindow::extractSelection()
+QAction &MainWindow::addReplicatedAction(QMenu &menu, QAction &existingAction)
 {
-	ImageItemModel *model = dynamic_cast<ImageItemModel *>(m_ui->mainTree->model());
-	if (!model)
-		return;
-
-	QModelIndexList indexes = m_ui->mainTree->selectionModel()->selectedRows();
-	switch (indexes.size())
-	{
-	case 0:
-		// do nothing; should not happen
-		break;
-
-	case 1:
-		// single selection; extract one item
-		extractSingle(*model, indexes[0]);
-		break;
-
-	default:
-		// multiple selection; extract multiple items to a directory
-		extractMultiple(*model, indexes);
-		break;
-	}
+	QAction &newAction = *menu.addAction(existingAction.text(), [&existingAction] { existingAction.triggered(); });
+	newAction.setEnabled(existingAction.isEnabled());
+	return newAction;
 }
 
 
@@ -457,12 +441,58 @@ void MainWindow::on_actionClose_triggered()
 
 
 //-------------------------------------------------
+//  on_actionView_triggered
+//-------------------------------------------------
+
+void MainWindow::on_actionView_triggered()
+{
+	ImageItemModel *model = dynamic_cast<ImageItemModel *>(m_ui->mainTree->model());
+	if (!model)
+		return;
+
+	QModelIndexList indexes = m_ui->mainTree->selectionModel()->selectedRows();
+	for (const QModelIndex &index : indexes)
+	{
+		std::optional<std::vector<uint8_t>> bytes = model->readFile(index);
+		if (bytes)
+		{
+			ViewFileDialog &viewFileDialog = *new ViewFileDialog(this);
+			viewFileDialog.setAttribute(Qt::WA_DeleteOnClose);
+			viewFileDialog.setWindowTitle(model->fileName(index));
+			viewFileDialog.setFileBytes(std::move(*bytes));
+			viewFileDialog.show();
+		}
+	}
+}
+
+
+//-------------------------------------------------
 //  on_actionExtract_triggered
 //-------------------------------------------------
 
 void MainWindow::on_actionExtract_triggered()
 {
-	extractSelection();
+	ImageItemModel *model = dynamic_cast<ImageItemModel *>(m_ui->mainTree->model());
+	if (!model)
+		return;
+
+	QModelIndexList indexes = m_ui->mainTree->selectionModel()->selectedRows();
+	switch (indexes.size())
+	{
+	case 0:
+		// do nothing; should not happen
+		break;
+
+	case 1:
+		// single selection; extract one item
+		extractSingle(*model, indexes[0]);
+		break;
+
+	default:
+		// multiple selection; extract multiple items to a directory
+		extractMultiple(*model, indexes);
+		break;
+	}
 }
 
 
@@ -485,8 +515,8 @@ void MainWindow::on_actionAbout_triggered()
 void MainWindow::on_mainTree_customContextMenuRequested(const QPoint &pos)
 {
 	QMenu popupMenu;
-	QAction &extractAction = *popupMenu.addAction(m_ui->actionExtract->text(), [this] { extractSelection(); });
-	extractAction.setEnabled(m_ui->actionExtract->isEnabled());
+	addReplicatedAction(popupMenu, *m_ui->actionView);
+	addReplicatedAction(popupMenu, *m_ui->actionExtract);
 
 	// show the popup menu
 	QPoint globalPos = m_ui->mainTree->mapToGlobal(pos);

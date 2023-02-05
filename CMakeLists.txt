@@ -112,8 +112,13 @@ add_executable(qfloptool
   src/dialogs/identify.cpp
   src/dialogs/identify.h
   src/dialogs/identify.ui
+  src/dialogs/viewfile.cpp
+  src/dialogs/viewfile.h
+  src/dialogs/viewfile.ui
+  deps/qhexview/src/qhexview.cpp
+  deps/qhexview/include/qhexview.h
 )
 
-target_include_directories(qfloptool PRIVATE deps/mame/src/lib deps/mame/src/lib/formats deps/mame/src/lib/util deps/mame/src/osd src/mame_generated)
+target_include_directories(qfloptool PRIVATE deps/mame/src/lib deps/mame/src/lib/formats deps/mame/src/lib/util deps/mame/src/osd deps/qhexview/include src/mame_generated)
 target_link_libraries(qfloptool PRIVATE mame_lib_formats mame_lib_util Qt6::Widgets ${EXPAT_LIBRARIES} ${ZLIB_LIBRARIES} ${QT_STATIC_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 qt_import_plugins(qfloptool INCLUDE_BY_TYPE imageformats Qt::QGifPlugin Qt::QJpegPlugin Qt::QICOPlugin EXCLUDE_BY_TYPE sqldrivers)

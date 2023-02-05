@@ -317,26 +317,56 @@ QString ImageItemModel::fileName(const QModelIndex &index) const
 
 
 //-------------------------------------------------
+//  pathFromModelIndex
+//-------------------------------------------------
+
+std::vector<std::string> ImageItemModel::pathFromModelIndex(const QModelIndex &index, int &directoryIndex, int &directoryEntryIndex) const
+{
+	std::vector<std::string> result;
+
+	// look up the directory entry
+	if (index.isValid())
+	{
+		directoryIndex = index.internalId();
+		directoryEntryIndex = index.row();
+		const DirectoryEntry &directoryEntry = m_info->m_directories[directoryIndex].m_children[directoryEntryIndex];
+
+		// determine the path
+		appendDirectoryPath(result, index.internalId());
+		result.push_back(directoryEntry.m_name);
+	}
+	return result;
+}
+
+
+//-------------------------------------------------
+//  readFile
+//-------------------------------------------------
+
+std::optional<std::vector<uint8_t>> ImageItemModel::readFile(const QModelIndex &index) const
+{
+	// determine the path
+	int directoryIndex, directoryEntryIndex;
+	std::vector<std::string> pathOnImage = pathFromModelIndex(index, directoryIndex, directoryEntryIndex);
+	return m_image->readFile(pathOnImage);
+}
+
+
+//-------------------------------------------------
 //  extract
 //-------------------------------------------------
 
 void ImageItemModel::extract(const QModelIndex &index, const QString &path, bool appendImageFileName)
 {
-	// look up the directory entry
-	if (!index.isValid())
-		return;
-	int directoryIndex = index.internalId();
-	int directoryEntryIndex = index.row();
-	const DirectoryEntry &directoryEntry = m_info->m_directories[directoryIndex].m_children[directoryEntryIndex];
-
 	// determine the path
-	std::vector<std::string> pathOnImage;
-	appendDirectoryPath(pathOnImage, index.internalId());
-	pathOnImage.push_back(directoryEntry.m_name);
+	int directoryIndex, directoryEntryIndex;
+	std::vector<std::string> pathOnImage = pathFromModelIndex(index, directoryIndex, directoryEntryIndex);
+	if (pathOnImage.empty())
+		return;
 
 	// recursively extract the image
 	internalExtract(pathOnImage, directoryIndex, directoryEntryIndex,
-		appendImageFileName ? QString("%1/%2").arg(path, convert(directoryEntry.m_name)) : path);
+		appendImageFileName ? QString("%1/%2").arg(path, convert(pathOnImage[pathOnImage.size() - 1])) : path);
 }
 
 
@@ -352,14 +382,14 @@ void ImageItemModel::internalExtract(std::vector<std::string> &pathOnImage, int 
 	case EntryType::File:
 		{
 			// this a file; get the bytes off the image
-			auto [err, bytes] = m_image->mameFileSystem().file_read(pathOnImage);
-			if (err)
+			auto bytes = m_image->readFile(pathOnImage);
+			if (!bytes)
 				return;
 
 			// and write it locally
 			QFile file(path);
 			if (file.open(QIODevice::WriteOnly))
-				file.write((const char *) &bytes[0], bytes.size());
+				file.write((const char *) &(*bytes)[0], bytes->size());
 		}
 		break;
 

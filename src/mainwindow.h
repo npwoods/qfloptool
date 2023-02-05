@@ -48,6 +48,7 @@ private slots:
 	void on_actionNew_triggered();
 	void on_actionOpen_triggered();
 	void on_actionClose_triggered();
+	void on_actionView_triggered();
 	void on_actionExtract_triggered();
 	void on_actionAbout_triggered();
 	void on_mainTree_customContextMenuRequested(const QPoint &pos);
@@ -66,7 +67,7 @@ private:
 	void setTitleFromImageInfo(const QString &fileName = "");
 	void extractSingle(ImageItemModel &model, const QModelIndex &index);
 	void extractMultiple(ImageItemModel &model, const QModelIndexList &indexes);
-	void extractSelection();
+	static QAction &addReplicatedAction(QMenu &menu, QAction &existingAction);
 };
 
 #endif // MAINWINDOW_H

@@ -452,6 +452,19 @@ std::optional<QString> Floptool::Image::volumeName() const
 
 
 //-------------------------------------------------
+//  Image::readFile
+//-------------------------------------------------
+
+std::optional<std::vector<uint8_t>> Floptool::Image::readFile(const std::vector<std::string> &path) const
+{
+	auto [err, bytes] = mameFileSystem().file_read(path);
+	return err
+		? std::nullopt
+		: std::optional<std::vector<uint8_t>>(std::move(bytes));
+}
+
+
+//-------------------------------------------------
 //  MameFormatsEnumeratorImpl ctor
 //-------------------------------------------------
 
