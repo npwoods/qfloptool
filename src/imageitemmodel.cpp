@@ -438,7 +438,7 @@ QModelIndex ImageItemModel::parent(const QModelIndex &child) const
 {
 	const Directory &directory = m_info->m_directories[child.internalId()];
 	return directory.m_parentIndex >= 0 && directory.m_parentEntryIndex >= 0
-		? createIndex(directory.m_parentEntryIndex, child.column(), directory.m_parentIndex)
+		? createIndex(directory.m_parentEntryIndex, 0, directory.m_parentIndex)
 		: QModelIndex();
 }
 
