@@ -46,16 +46,16 @@ jobs:
       id: cache-deps
       uses: actions/cache@v3
       env:
-        cache-name: cache-deps
+        cache-name: cache-deps-windows-msys2
       with:
         path: deps/install
         key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.build_type }}-${{ hashFiles('.github/workflows/windows_msys2.yml')}}
 
-    # Retrieve MAME
-    - name: Retrieve MAME
-      if: steps.cache-deps.outputs.cache-hit != 'true'
+    # Retrieve Submodules
+    - name: Retrieve Submodules
+      if: steps.cache-deps-windows-msys2.outputs.cache-hit != 'true'
       run: |
-        git submodule update --init deps/mame
+        git submodule update --init deps/mame deps/qhexview
 
     # Build qfloptool
     - name: Build qfloptool
