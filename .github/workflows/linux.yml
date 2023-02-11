@@ -35,7 +35,7 @@ jobs:
     - name: Install Packages
       run: |
         sudo apt update
-        sudo apt install -y clang-15
+        sudo apt install -y clang-15 libstdc++6
 
     # Install Qt
     - name: Install Qt
