@@ -569,20 +569,50 @@ MameRandomRead::MameRandomRead(QIODevice &inner)
 }
 
 
+//-------------------------------------------------
+//  MameRandomRead::read
+//-------------------------------------------------
+
 std::error_condition MameRandomRead::read(void *buffer, std::size_t length, std::size_t &actual) noexcept
 {
 	actual = m_inner.read((char *)buffer, length);
 	return std::error_condition();
 }
 
+
+//-------------------------------------------------
+//  MameRandomRead::seek
+//-------------------------------------------------
+
 std::error_condition MameRandomRead::seek(std::int64_t offset, int whence) noexcept
 {
-	throw false;
+	switch (whence)
+	{
+	case SEEK_SET:
+		// do nothing
+		break;
+
+	case SEEK_CUR:
+		offset += m_inner.pos();
+		break;
+
+	case SEEK_END:
+		offset += m_inner.size();
+		break;
+	}
+	m_inner.seek(offset);
+	return std::error_condition();
 }
+
+
+//-------------------------------------------------
+//  MameRandomRead::tell
+//-------------------------------------------------
 
 std::error_condition MameRandomRead::tell(std::uint64_t &result) noexcept
 {
-	throw false;
+	result = m_inner.pos();;
+	return std::error_condition();
 }
 
 //-------------------------------------------------
