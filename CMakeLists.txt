@@ -115,8 +115,8 @@ add_executable(qfloptool
   src/dialogs/viewfile.cpp
   src/dialogs/viewfile.h
   src/dialogs/viewfile.ui
-  deps/qhexview/src/qhexview.cpp
-  deps/qhexview/include/qhexview.h
+  deps/qhexview/src/QHexView.cpp
+  deps/qhexview/include/QHexView.h
 )
 
 target_include_directories(qfloptool PRIVATE deps/mame/src/lib deps/mame/src/lib/formats deps/mame/src/lib/util deps/mame/src/osd deps/qhexview/include src/mame_generated)
