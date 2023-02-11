@@ -38,7 +38,7 @@
   <customwidget>
    <class>QHexView</class>
    <extends>QWidget</extends>
-   <header>qhexview.h</header>
+   <header>QHexView.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
