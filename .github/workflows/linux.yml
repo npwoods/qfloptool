@@ -51,7 +51,7 @@ jobs:
 
     # Retrieve Submodules
     - name: Retrieve Submodules
-      if: steps.cache-deps-linux.outputs.cache-hit != 'true'
+      if: steps.cache-deps.outputs.cache-hit != 'true'
       run: |
         git submodule update --init deps/mame deps/qhexview
 
