@@ -48,7 +48,7 @@ jobs:
       env:
         cache-name: cache-deps-windows-msys2
       with:
-        path: deps/install
+        path: deps
         key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.build_type }}-${{ hashFiles('.github/workflows/windows_msys2.yml')}}
 
     # Retrieve Submodules
