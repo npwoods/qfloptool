@@ -56,28 +56,16 @@ jobs:
       id: cache-deps
       uses: actions/cache@v3
       env:
-        cache-name: cache-deps
+        cache-name: cache-deps-windows-msvc2022
       with:
-        path: deps/install
+        path: deps
         key: ${{ runner.os }}-build-${{ matrix.config }}-${{ env.cache-name }}-${{ hashFiles('.github/workflows/windows_msvc2019.yml', 'scripts/zlib_build_msvc.sh', 'scripts/expat_build_msvc.sh')}}
 
-    # Retrieve MAME
-    - name: Retrieve MAME
+    # Retrieve Submodules
+    - name: Retrieve Submodules
       if: steps.cache-deps.outputs.cache-hit != 'true'
       run: |
-        git submodule update --init deps/mame
-
-    # Retrieve Zlib
-    - name: Retrieve Zlib
-      if: steps.cache-deps.outputs.cache-hit != 'true'
-      run: |
-        git submodule update --init deps/zlib
-
-    # Retrieve Expat
-    - name: Retrieve Expat
-      if: steps.cache-deps.outputs.cache-hit != 'true'
-      run: |
-        git submodule update --init deps/expat
+        git submodule update --init deps/mame deps/qhexview deps/zlib deps/expat
 
     # Build Zlib
     - name: Build Zlib
